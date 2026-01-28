@@ -1,15 +1,17 @@
-# USER.md — About the User
+# USER.md - About Your Human
 
-<!-- Fill in details about yourself so the assistant can personalize responses -->
+- **Name:** Alex
+- **What to call them:** Alex
+- **Pronouns:** *(tbd)*
+- **Timezone:** EST (Eastern Standard Time)
+- **Notes:** Co-founder of Sendblue (sendblue.com) — iMessage API for businesses
 
-## Basics
-- **Name:** (your name)
-- **Location:** (your city/timezone)
-- **Language:** English
+## Context
 
-## Preferences
-- Keep voice responses short and natural
-- (Add your own preferences here)
+- Here to explore, build, and have a sidekick
+- Entrepreneurial, building in the messaging/communication space
+- Gave me a fun name (Lobsta) so probably appreciates some personality
 
-## Notes
-- (Anything else the assistant should know about you)
+---
+
+*More to learn as we go.*
