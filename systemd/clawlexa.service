@@ -1,0 +1,37 @@
+[Unit]
+Description=Clawlexa Voice Assistant
+Documentation=https://github.com/ajluis/Clawlexa
+After=network-online.target bluetooth.target pulseaudio.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+
+WorkingDirectory=/home/pi/Clawlexa
+ExecStart=/home/pi/Clawlexa/venv/bin/python src/main.py
+EnvironmentFile=/home/pi/Clawlexa/.env
+
+# Restart on failure
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=clawlexa
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/home/pi/Clawlexa /tmp
+PrivateTmp=true
+
+# Audio access
+SupplementaryGroups=audio bluetooth pulse-access
+
+[Install]
+WantedBy=multi-user.target

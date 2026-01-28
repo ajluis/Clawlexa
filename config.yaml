@@ -1,0 +1,46 @@
+# Clawlexa Configuration
+# Copy this to config.yaml and customize
+
+wake_word:
+  engine: porcupine
+  keyword: picovoice        # Built-in keyword (free). For custom: provide .ppn file path
+  sensitivity: 0.5          # 0.0 to 1.0 — higher = more sensitive, more false positives
+  # access_key: ""          # Set via PORCUPINE_ACCESS_KEY env var
+
+audio:
+  sample_rate: 16000         # Hz — required by most STT/VAD models
+  channels: 1                # Mono
+  chunk_size: 512            # Frames per buffer (512 = 32ms at 16kHz)
+  format: paInt16            # 16-bit signed int
+  input_device: null         # null = system default. Set device index for specific mic
+  output_device: null        # null = system default. Set device index for specific speaker
+  silence_threshold: 2.0     # Seconds of silence before stopping recording
+
+stt:
+  engine: whisper_api
+  model: whisper-1
+  language: en               # ISO language code, null for auto-detect
+  # api_key: ""              # Set via OPENAI_API_KEY env var
+
+brain:
+  gateway_url: http://localhost:3000   # Your Clawdbot Gateway URL
+  gateway_token: ""                     # Set via CLAWDBOT_GATEWAY_TOKEN env var
+  session: clawlexa                     # Session name for conversation continuity
+  timeout: 30                           # Seconds to wait for response
+
+tts:
+  engine: piper
+  voice: en_US-lessac-medium           # Piper voice model name
+  voice_dir: ./voices                  # Directory for downloaded voice models
+  speed: 1.0                           # Playback speed multiplier
+  speaker_id: null                     # For multi-speaker models
+
+feedback:
+  chime_on_wake: true                  # Play a chime when wake word is detected
+  chime_file: null                     # Custom chime WAV path. null = built-in beep
+  led_enabled: false                   # GPIO LED feedback (requires wiring)
+  led_pin: 18                          # BCM GPIO pin for LED
+
+logging:
+  level: INFO                          # DEBUG, INFO, WARNING, ERROR
+  file: null                           # Log to file path. null = stdout only
