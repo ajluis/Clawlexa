@@ -1,8 +1,9 @@
 [Unit]
 Description=Clawlexa Voice Assistant
 Documentation=https://github.com/ajluis/Clawlexa
-After=network-online.target bluetooth.target pulseaudio.service
+After=network-online.target bluetooth.target pulseaudio.service clawdbot-gateway.service
 Wants=network-online.target
+Requires=clawdbot-gateway.service
 
 [Service]
 Type=simple

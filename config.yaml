@@ -23,7 +23,7 @@ stt:
   # api_key: ""              # Set via OPENAI_API_KEY env var
 
 brain:
-  gateway_url: http://localhost:3000   # Your Clawdbot Gateway URL
+  gateway_url: http://localhost:3000   # Clawdbot runs on the Pi — localhost by default
   gateway_token: ""                     # Set via CLAWDBOT_GATEWAY_TOKEN env var
   session: clawlexa                     # Session name for conversation continuity
   timeout: 30                           # Seconds to wait for response

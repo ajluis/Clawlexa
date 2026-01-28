@@ -34,3 +34,6 @@ Thumbs.db
 
 # PyTorch cache
 torch_cache/
+
+# Node modules (Clawdbot is installed globally)
+node_modules/

@@ -39,6 +39,61 @@ sudo apt-get install -y -qq \
 
 echo "✅ System dependencies installed."
 
+# ─── Node.js & Clawdbot ────────────────────────────────────────────
+
+echo ""
+echo "🧠 Installing Node.js 22 and Clawdbot..."
+
+if ! command -v node &> /dev/null || [[ "$(node -v)" != v22* ]]; then
+    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+    sudo apt-get install -y -qq nodejs
+fi
+
+echo "   Node.js $(node -v) installed."
+
+# Install Clawdbot globally
+sudo npm install -g clawdbot -q 2>/dev/null || sudo npm install -g clawdbot
+echo "   Clawdbot $(clawdbot --version 2>/dev/null || echo 'installed')."
+
+# ─── Clawdbot Workspace ────────────────────────────────────────────
+
+CLAWDBOT_WORKSPACE="$HOME/clawdbot-workspace"
+
+if [ ! -d "$CLAWDBOT_WORKSPACE" ]; then
+    echo ""
+    echo "📁 Creating Clawdbot workspace at $CLAWDBOT_WORKSPACE..."
+    mkdir -p "$CLAWDBOT_WORKSPACE"
+
+    # Copy workspace template files
+    cp "$SCRIPT_DIR/clawdbot/AGENTS.md" "$CLAWDBOT_WORKSPACE/"
+    cp "$SCRIPT_DIR/clawdbot/SOUL.md" "$CLAWDBOT_WORKSPACE/"
+    cp "$SCRIPT_DIR/clawdbot/USER.md" "$CLAWDBOT_WORKSPACE/"
+    cp "$SCRIPT_DIR/clawdbot/TOOLS.md" "$CLAWDBOT_WORKSPACE/"
+    cp "$SCRIPT_DIR/clawdbot/clawdbot.yaml" "$CLAWDBOT_WORKSPACE/"
+
+    # Install skills
+    echo "   Installing skills..."
+    cd "$CLAWDBOT_WORKSPACE"
+    clawdbot skill install todoist 2>/dev/null || echo "   ⚠️  todoist skill install skipped"
+    clawdbot skill install spanish-tutor 2>/dev/null || echo "   ⚠️  spanish-tutor skill install skipped"
+    clawdbot skill install tech-news-digest 2>/dev/null || echo "   ⚠️  tech-news-digest skill install skipped"
+    cd "$SCRIPT_DIR"
+
+    echo "✅ Clawdbot workspace created."
+else
+    echo "✅ Clawdbot workspace already exists at $CLAWDBOT_WORKSPACE."
+fi
+
+# Generate a gateway token if not already set
+if [ -z "${CLAWDBOT_GATEWAY_TOKEN:-}" ]; then
+    GENERATED_TOKEN=$(openssl rand -hex 32 2>/dev/null || python3 -c "import secrets; print(secrets.token_hex(32))")
+    echo ""
+    echo "🔑 Generated Clawdbot Gateway token."
+    echo "   Save this in your .env file: CLAWDBOT_GATEWAY_TOKEN=$GENERATED_TOKEN"
+fi
+
+echo "✅ Clawdbot setup complete."
+
 # ─── Python Virtual Environment ────────────────────────────────────
 
 echo ""
@@ -83,9 +138,12 @@ fi
 # ─── Environment File ──────────────────────────────────────────────
 
 if [ ! -f "$SCRIPT_DIR/.env" ]; then
-    cat > "$SCRIPT_DIR/.env" << 'EOF'
+    cat > "$SCRIPT_DIR/.env" << EOF
 # Clawlexa Environment Variables
 # Fill in your API keys below
+
+# Required: Anthropic API key (for Claude brain via Clawdbot)
+ANTHROPIC_API_KEY=
 
 # Required: Picovoice access key (free at https://console.picovoice.ai/)
 PORCUPINE_ACCESS_KEY=
@@ -93,11 +151,8 @@ PORCUPINE_ACCESS_KEY=
 # Required: OpenAI API key (for Whisper STT)
 OPENAI_API_KEY=
 
-# Required: Clawdbot Gateway token
-CLAWDBOT_GATEWAY_TOKEN=
-
-# Optional: Clawdbot Gateway URL (if not localhost)
-# CLAWDBOT_GATEWAY_URL=http://your-server:3000
+# Required: Clawdbot Gateway token (auto-generated — do not change unless you know what you're doing)
+CLAWDBOT_GATEWAY_TOKEN=${GENERATED_TOKEN:-$(openssl rand -hex 32 2>/dev/null || python3 -c "import secrets; print(secrets.token_hex(32))")}
 EOF
     echo "📝 Created .env file — fill in your API keys!"
 else
@@ -110,14 +165,21 @@ echo ""
 read -p "🔧 Install systemd service for auto-start? [y/N] " -n 1 -r
 echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    # Update the service file with actual paths
+    # Install Clawdbot Gateway service (starts before Clawlexa)
+    sed "s|/home/pi/clawdbot-workspace|$CLAWDBOT_WORKSPACE|g" "$SCRIPT_DIR/systemd/clawdbot-gateway.service" | \
+    sed "s|/home/pi/Clawlexa|$SCRIPT_DIR|g" | \
+    sudo tee /etc/systemd/system/clawdbot-gateway.service > /dev/null
+
+    # Install Clawlexa service
     sed "s|/home/pi/Clawlexa|$SCRIPT_DIR|g" "$SCRIPT_DIR/systemd/clawlexa.service" | \
     sed "s|/home/pi/Clawlexa/venv/bin/python|$VENV_DIR/bin/python|g" | \
     sudo tee /etc/systemd/system/clawlexa.service > /dev/null
 
     sudo systemctl daemon-reload
+    sudo systemctl enable clawdbot-gateway
     sudo systemctl enable clawlexa
-    echo "✅ Systemd service installed. Start with: sudo systemctl start clawlexa"
+    echo "✅ Systemd services installed."
+    echo "   Start with: sudo systemctl start clawdbot-gateway && sudo systemctl start clawlexa"
 fi
 
 # ─── Done ───────────────────────────────────────────────────────────
@@ -126,8 +188,9 @@ echo ""
 echo "🦞 Clawlexa setup complete!"
 echo ""
 echo "Next steps:"
-echo "  1. Edit .env and fill in your API keys"
-echo "  2. Edit config.yaml to set your Clawdbot gateway URL"
-echo "  3. Run: source venv/bin/activate && python src/main.py"
+echo "  1. Edit .env and fill in your API keys (including ANTHROPIC_API_KEY)"
+echo "  2. Edit ~/clawdbot-workspace/USER.md to personalize your assistant"
+echo "  3. Start the gateway: sudo systemctl start clawdbot-gateway"
+echo "  4. Run: source venv/bin/activate && python src/main.py"
 echo ""
 echo "For full setup guide, see: docs/SETUP.md"

@@ -1,0 +1,28 @@
+# Clawdbot Gateway Configuration for Clawlexa (Raspberry Pi)
+#
+# This runs Clawdbot directly on the Pi as the brain for Clawlexa.
+# The LLM API calls still go to cloud (Anthropic), but the gateway itself is local.
+#
+# To start: clawdbot gateway start
+# Or via systemd: sudo systemctl start clawdbot-gateway
+
+gateway:
+  port: 3000
+  host: 127.0.0.1
+
+model:
+  provider: anthropic
+  model: anthropic/claude-sonnet-4-20250514
+  # Good balance of speed and quality for voice interactions.
+  # Upgrade to claude-opus-4-0-20250514 for more complex reasoning (slower, more expensive).
+
+# Set your API key in .env or export it:
+#   export ANTHROPIC_API_KEY=sk-ant-...
+#
+# You can also set it here (not recommended — use env vars):
+# anthropic_api_key: sk-ant-...
+
+auth:
+  # Gateway token — must match CLAWDBOT_GATEWAY_TOKEN in Clawlexa's .env
+  # Generated automatically by setup.sh, or set your own:
+  token: "${CLAWDBOT_GATEWAY_TOKEN}"

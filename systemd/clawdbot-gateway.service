@@ -1,0 +1,32 @@
+[Unit]
+Description=Clawdbot Gateway for Clawlexa
+Documentation=https://github.com/clawdbot
+After=network-online.target
+Wants=network-online.target
+Before=clawlexa.service
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+
+WorkingDirectory=/home/pi/clawdbot-workspace
+ExecStart=/usr/bin/env clawdbot gateway start
+EnvironmentFile=/home/pi/Clawlexa/.env
+
+# Restart on failure
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=clawdbot-gateway
+
+# Security hardening
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

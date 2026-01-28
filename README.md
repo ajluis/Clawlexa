@@ -24,8 +24,10 @@ Clawlexa is an open-source, privacy-conscious voice assistant that runs on a Ras
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │  Wake Word  │───▶│     STT     │───▶│    Brain    │───▶│     TTS     │───▶│   Speaker   │
 │ (Porcupine) │    │(Whisper API)│    │ (Clawdbot)  │    │   (Piper)   │    │ (Bluetooth) │
-│   LOCAL     │    │    CLOUD    │    │   CLOUD     │    │   LOCAL     │    │   LOCAL     │
+│   LOCAL     │    │    CLOUD    │    │   LOCAL*    │    │   LOCAL     │    │   LOCAL     │
 └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+
+* Clawdbot Gateway runs locally on the Pi. LLM API calls (Claude) still go to cloud.
 ```
 
 **How it works:**
@@ -40,10 +42,10 @@ Clawlexa is an open-source, privacy-conscious voice assistant that runs on a Ras
 
 ### Prerequisites
 
-- Raspberry Pi 5 (2GB+ RAM) with Raspberry Pi OS (64-bit)
+- Raspberry Pi 5 (4GB RAM recommended, 2GB minimum) with Raspberry Pi OS (64-bit)
 - USB microphone or Bluetooth speaker with built-in mic
 - Internet connection
-- A running [Clawdbot](https://github.com/clawdbot) Gateway instance
+- An [Anthropic API key](https://console.anthropic.com/) (for Claude)
 
 ### Install
 
@@ -57,10 +59,8 @@ chmod +x setup.sh
 ### Configure
 
 ```bash
-cp config.yaml.example config.yaml
-nano config.yaml
-# Set your Clawdbot gateway URL and token
-# Set your OpenAI API key (for Whisper)
+nano .env
+# Set your ANTHROPIC_API_KEY, OPENAI_API_KEY, and other keys
 ```
 
 ### Run
@@ -100,8 +100,9 @@ See [docs/HARDWARE.md](docs/HARDWARE.md) for full details.
 
 | Variable | Description | Required |
 |----------|-------------|----------|
+| `ANTHROPIC_API_KEY` | Anthropic API key for Claude (brain) | Yes |
 | `OPENAI_API_KEY` | OpenAI API key for Whisper STT | Yes |
-| `CLAWDBOT_GATEWAY_TOKEN` | Clawdbot Gateway auth token | Yes |
+| `CLAWDBOT_GATEWAY_TOKEN` | Clawdbot Gateway auth token (auto-generated) | Yes |
 | `PORCUPINE_ACCESS_KEY` | Picovoice access key (free tier) | Yes |
 
 ## Project Structure
@@ -116,9 +117,17 @@ clawlexa/
 │   ├── brain.py         # Clawdbot Gateway communication
 │   ├── tts.py           # Text-to-speech (Piper)
 │   └── vad.py           # Voice activity detection (Silero)
+├── clawdbot/            # Clawdbot workspace templates
+│   ├── AGENTS.md        # Agent instructions
+│   ├── SOUL.md          # Assistant personality
+│   ├── USER.md          # User info template
+│   ├── TOOLS.md         # Tool notes template
+│   └── clawdbot.yaml    # Gateway config template
 ├── voices/              # Piper voice models
 ├── scripts/             # Installation helpers
-├── systemd/             # systemd service file
+├── systemd/             # systemd service files
+│   ├── clawlexa.service
+│   └── clawdbot-gateway.service
 ├── docs/                # Documentation
 ├── config.yaml          # Configuration
 ├── setup.sh             # One-line setup

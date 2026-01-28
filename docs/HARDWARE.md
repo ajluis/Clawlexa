@@ -4,7 +4,7 @@
 
 | Component | Specification | Approx. Cost |
 |-----------|--------------|-------------|
-| **Raspberry Pi 5** | 2GB RAM minimum | $50 |
+| **Raspberry Pi 5** | 4GB RAM recommended (2GB tight — see note) | $50-60 |
 | **Power Supply** | 27W USB-C (official recommended) | $12 |
 | **microSD Card** | 32GB+ Class 10 / A2 | $10 |
 | **USB Microphone** | Any USB mic or webcam with mic | $10-30 |
@@ -16,7 +16,7 @@
 
 | Component | Specification | Notes |
 |-----------|--------------|-------|
-| **Raspberry Pi 5** | 4GB RAM | More headroom for VAD model |
+| **Raspberry Pi 5** | 4GB RAM | Headroom for VAD model + Clawdbot Gateway |
 | **Power Supply** | 27W USB-C (official) | Don't skimp — under-voltage causes issues |
 | **microSD Card** | 64GB A2 (Samsung EVO Select) | Faster I/O |
 | **Bluetooth Speaker w/ Mic** | JBL Flip, Anker Soundcore, etc. | All-in-one audio I/O |
@@ -65,6 +65,14 @@ The [ReSpeaker 2-Mics Pi HAT](https://wiki.seeedstudio.com/ReSpeaker_2_Mics_Pi_H
 - **WiFi:** Built-in 802.11ac on Pi 5 — sufficient for API calls
 - **Ethernet:** More reliable for always-on operation
 - **Bandwidth:** Minimal — only STT audio upload (~32KB/s) and API text responses
+
+## Memory Note
+
+Clawdbot Gateway (Node.js) runs locally on the Pi and uses ~150-200MB of RAM. Combined with
+Python (Clawlexa + PyTorch VAD model), total RAM usage is ~800MB-1.2GB.
+
+- **2GB Pi:** Workable but tight. Close to the limit under load. No desktop environment.
+- **4GB Pi:** Recommended. Comfortable headroom for all components.
 
 ## Storage
 
